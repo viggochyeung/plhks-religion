@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>五旬節林漢光中學 學生團契 敬拜隊管理系統 - PLHKS SCF Worship Team</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gsheet: {
+                            header: '#0f9d58',
+                            dark: '#0b8043',
+                            light: '#e6f4ea',
+                            border: '#cbd5e1',
+                            rowHover: '#f0fdf4',
+                            bar: '#f8f9fa'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Mobile Touch & iOS Auto-zoom Prevention */
+        @media (max-width: 640px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .touch-scroll {
+            -webkit-overflow-scrolling: touch;
+        }
+        .font-mono-code {
+            font-family: 'Roboto Mono', monospace;
+        }
+        .sheet-table td, .sheet-table th {
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+        }
+        .sheet-table tr:hover td {
+            background-color: #f0fdf4;
+        }
+        /* Sleek Modern Scrollbar for Mac & Windows */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.2s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col selection:bg-teal-500 selection:text-white pb-[env(safe-area-inset-bottom)]">
+
+    <div id="app" class="flex-grow flex flex-col">
+        <!-- Toast Notification -->
+        <transition name="fade">
+            <div v-if="toast.show" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:bottom-5 z-50 flex items-center justify-center sm:justify-start gap-3 bg-slate-900/95 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-slate-700 backdrop-blur-md">
+                <i :class="toast.icon || 'fa-solid fa-circle-check'" class="text-teal-400 text-lg"></i>
+                <span class="text-sm font-medium">{{ toast.message }}</span>
+            </div>
+        </transition>
+
+        <!-- Main Header -->
+        <header class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white shadow-lg sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between py-3 sm:py-4 border-b border-slate-800/80 gap-3">
+                    <!-- School Branding -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-600 flex items-center justify-center text-white font-black text-lg sm:text-xl shadow-md border border-teal-400/30 flex-shrink-0">
+                            <i class="fa-solid fa-cross"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="bg-teal-500/20 text-teal-300 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-semibold border border-teal-500/30">五旬節林漢光中學</span>
+                                <span class="text-[10px] sm:text-xs text-slate-400 font-medium tracking-wide">PLHKS SCF Worship Team</span>
+                            </div>
+                            <h1 class="text-lg sm:text-2xl font-black tracking-tight text-white truncate mt-0.5">
+                                學生團契 敬拜隊管理系統
+                            </h1>
+                        </div>
+                    </div>
+
+                    <!-- Header Quick Actions & Date Indicator -->
+                    <div class="flex items-center gap-2 sm:gap-3 text-xs text-slate-300 justify-between sm:justify-end">
+                        <div class="bg-slate-800/90 px-3 py-1.5 sm:py-2 rounded-xl border border-slate-700/70 flex items-center gap-2">
+                            <i class="fa-regular fa-calendar-check text-teal-400 text-sm"></i>
+                            <div>
+                                <div class="text-[9px] sm:text-[10px] text-slate-400 font-medium">目前選取團契</div>
+                                <div class="font-bold text-teal-300 text-xs sm:text-sm">{{ activeScheduleItem.dateDisplay }}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-1.5">
+                            <button 
+                                @click="snapToNextUpcoming" 
+                                class="bg-teal-600 hover:bg-teal-500 text-white font-bold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm text-xs min-h-[40px] sm:min-h-[44px]">
+                                <i class="fa-solid fa-bolt text-xs"></i>
+                                <span class="hidden xs:inline">定位來週</span>
+                                <span class="xs:hidden">來週</span>
+                            </button>
+
+                            <!-- Admin Lock/Unlock Toggle -->
+                            <button 
+                                @click="toggleAdminLock" 
+                                :class="isAdminMode ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-800 text-slate-300 border border-slate-700'"
+                                class="px-3 py-2 rounded-xl transition flex items-center gap-1.5 text-xs min-h-[40px] sm:min-h-[44px]">
+                                <i :class="isAdminMode ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock'"></i>
+                                <span>{{ isAdminMode ? '已解鎖' : '管理員' }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="flex space-x-1.5 sm:space-x-3 pt-2 pb-0.5 overflow-x-auto no-scrollbar touch-scroll">
+                    <button 
+                        @click="activeTab = 'roster'"
+                        :class="activeTab === 'roster' ? 'bg-teal-600 text-white font-bold shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'"
+                        class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-t-xl text-xs sm:text-sm transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap min-h-[44px]">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <span>本週崗位 (18次)</span>
+                    </button>
+
+                    <button 
+                        @click="activeTab = 'submit'"
+                        :class="activeTab === 'submit' ? 'bg-teal-600 text-white font-bold shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'"
+                        class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-t-xl text-xs sm:text-sm transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap min-h-[44px]">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        <span>提交詩歌 (3首)</span>
+                    </button>
+
+                    <button 
+                        @click="activeTab = 'archive'"
+                        :class="activeTab === 'archive' ? 'bg-teal-600 text-white font-bold shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'"
+                        class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-t-xl text-xs sm:text-sm transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap min-h-[44px]">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span>選歌總表</span>
+                        <span class="bg-slate-700/80 text-teal-300 text-[10px] px-2 py-0.5 rounded-full ml-0.5 font-semibold">{{ songSets.length }}</span>
+                    </button>
+
+                    <button 
+                        @click="activeTab = 'sheet'"
+                        :class="activeTab === 'sheet' ? 'bg-emerald-600 text-white font-bold shadow-md' : 'text-slate-300 hover:text-white hover:bg-slate-800/60'"
+                        class="px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-t-xl text-xs sm:text-sm transition-all duration-150 flex items-center gap-1.5 whitespace-nowrap min-h-[44px]">
+                        <i class="fa-solid fa-table-cells text-emerald-300"></i>
+                        <span>詩歌統計 (Sheet)</span>
+                        <span class="bg-emerald-800/80 text-emerald-200 text-[10px] px-2 py-0.5 rounded-full ml-0.5 font-semibold">{{ totalUniqueSongsCount }}首</span>
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+
+            <!-- TAB 1: 本週崗位安排 & 18次全學年名單 -->
+            <section v-if="activeTab === 'roster'" class="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
+                
+                <!-- Current Selected Fellowship Role Showcase Card -->
+                <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200/80 space-y-5">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div class="space-y-1.5">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="bg-teal-50 text-teal-700 font-bold px-2.5 py-0.5 rounded-md text-xs border border-teal-200">
+                                    {{ activeScheduleItem.term }}
+                                </span>
+                                <span class="bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded-md text-xs">
+                                    第 {{ selectedScheduleIndex + 1 }} 場團契
+                                </span>
+                            </div>
+                            <h2 class="text-xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                                {{ activeScheduleItem.dateDisplay }} 團契事奉名單
+                            </h2>
+                            <p class="text-slate-600 flex items-center gap-1.5 text-xs sm:text-sm">
+                                <i class="fa-solid fa-bookmark text-teal-600"></i>
+                                <span class="font-medium text-slate-700">週會主題：</span>
+                                <span class="font-bold text-teal-800 text-sm sm:text-base">{{ activeScheduleItem.theme }}</span>
+                            </p>
+                        </div>
+
+                        <!-- Date Dropdown Selector & Quick Actions -->
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                            <div class="w-full sm:w-auto">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1 sm:hidden">選擇團契日期：</label>
+                                <select 
+                                    v-model="selectedScheduleId" 
+                                    class="w-full sm:w-auto px-3 py-2.5 rounded-xl border border-slate-300 font-medium text-xs sm:text-sm text-slate-800 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-teal-500 min-h-[44px]">
+                                    <optgroup label="上學期 (First Term)">
+                                        <option v-for="item in upperTermSchedule" :key="item.id" :value="item.id">
+                                            {{ item.dateDisplay }} — {{ item.theme }} ({{ item.leader }})
+                                        </option>
+                                    </optgroup>
+                                    <optgroup label="下學期 (Second Term)">
+                                        <option v-for="item in lowerTermSchedule" :key="item.id" :value="item.id">
+                                            {{ item.dateDisplay }} — {{ item.theme }} ({{ item.leader }})
+                                        </option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:flex items-center gap-2 pt-1 sm:pt-0">
+                                <button 
+                                    @click="copyWhatsAppRoster" 
+                                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-xs min-h-[44px]">
+                                    <i class="fa-brands fa-whatsapp text-base"></i>
+                                    <span>複製通知</span>
+                                </button>
+                                <button 
+                                    @click="requestEditSchedule(activeScheduleItem)" 
+                                    class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-3.5 py-2.5 rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 text-xs min-h-[44px]">
+                                    <i :class="isAdminMode ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-lock text-amber-400'"></i>
+                                    <span>修訂名單</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Primary Roles Display -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                        <!-- Worship Leader -->
+                        <div class="bg-gradient-to-br from-teal-50/50 to-white rounded-2xl p-4 sm:p-6 border border-teal-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                            <div class="absolute top-0 left-0 right-0 h-1.5 bg-teal-500"></div>
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-teal-100/80 text-teal-700 flex items-center justify-center font-bold text-lg">
+                                        <i class="fa-solid fa-microphone-lines"></i>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-teal-800 bg-teal-100 px-2.5 py-0.5 rounded-full border border-teal-200">敬拜主領</span>
+                                </div>
+                                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Worship Leader</h3>
+                                <p class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ activeScheduleItem.leader || '待定' }}</p>
+                            </div>
+                            <div class="mt-4 pt-2.5 border-t border-teal-100/60 flex items-center justify-between text-xs text-slate-500">
+                                <span>選歌與帶領敬拜</span>
+                                <button @click="goToSubmitWithLeader(activeScheduleItem.leader)" class="text-teal-700 font-bold hover:underline py-1">
+                                    去提交 3 首詩歌 →
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chairperson -->
+                        <div class="bg-gradient-to-br from-indigo-50/50 to-white rounded-2xl p-4 sm:p-6 border border-indigo-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                            <div class="absolute top-0 left-0 right-0 h-1.5 bg-indigo-500"></div>
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-100/80 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                                        <i class="fa-solid fa-user-tie"></i>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-indigo-800 bg-indigo-100 px-2.5 py-0.5 rounded-full border border-indigo-200">團契主席</span>
+                                </div>
+                                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Chairperson</h3>
+                                <p class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ activeScheduleItem.chairperson || '待定' }}</p>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-4 pt-2.5 border-t border-indigo-100/60">主持團契流程與報告</p>
+                        </div>
+
+                        <!-- PPT Operator -->
+                        <div class="bg-gradient-to-br from-rose-50/50 to-white rounded-2xl p-4 sm:p-6 border border-rose-100 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                            <div class="absolute top-0 left-0 right-0 h-1.5 bg-rose-500"></div>
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-100/80 text-rose-700 flex items-center justify-center font-bold text-lg">
+                                        <i class="fa-solid fa-desktop"></i>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full border border-rose-200">PPT 負責人</span>
+                                </div>
+                                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">PPT Operator</h3>
+                                <p class="text-xl sm:text-2xl font-black text-slate-900 mt-0.5">{{ activeScheduleItem.ppt || '待定' }}</p>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-4 pt-2.5 border-t border-rose-100/60">製作 Canva/PPT 並控制歌詞</p>
+                        </div>
+                    </div>
+
+                    <!-- Guidelines Section (Editable by Admin) -->
+                    <div class="bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-200/80 space-y-3 text-xs">
+                        <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                            <div class="flex items-center gap-1.5 font-bold text-slate-800 text-xs sm:text-sm">
+                                <i class="fa-solid fa-clipboard-list text-teal-600"></i>
+                                <span>敬拜隊與 PPT 隊事奉須知</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button v-if="isAdminMode" @click="isEditingNotice = !isEditingNotice" class="text-teal-700 hover:text-teal-900 font-bold flex items-center gap-1 bg-teal-100/70 px-2.5 py-1 rounded-lg min-h-[36px]">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                    <span>{{ isEditingNotice ? '取消' : '編輯須知' }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Editable Notice Field -->
+                        <div v-if="isAdminMode && isEditingNotice" class="space-y-3">
+                            <textarea 
+                                v-model="customNotice" 
+                                rows="7" 
+                                class="w-full p-3 rounded-xl border border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-500 font-sans text-slate-800 leading-relaxed text-xs sm:text-sm"></textarea>
+                            <div class="flex justify-end">
+                                <button @click="saveNotice" class="bg-teal-600 hover:bg-teal-700 text-white font-bold px-4 py-2 rounded-lg shadow-xs min-h-[40px]">
+                                    儲存最新須知
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Readonly Notice Area -->
+                        <div v-else class="text-slate-700 whitespace-pre-line leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200/60 text-xs sm:text-sm">
+                            {{ customNotice }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FULL 18-SESSION ROSTER SECTION (STRICTLY NO REHEARSAL TIME COLUMN) -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden space-y-3">
+                    <div class="p-4 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 font-semibold px-2.5 py-0.5 rounded-md text-[11px] mb-1">
+                                <i class="fa-solid fa-calendar-days"></i>
+                                <span>2026-2027 官方事奉名單與主題總表</span>
+                            </div>
+                            <h3 class="text-lg sm:text-xl font-bold text-slate-900">全學年 18 次團契主題與輪值表</h3>
+                        </div>
+
+                        <!-- Term Selector Tabs -->
+                        <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
+                            <button 
+                                @click="tableTermFilter = 'ALL'" 
+                                :class="tableTermFilter === 'ALL' ? 'bg-white text-slate-900 font-bold shadow-2xs' : 'text-slate-600'"
+                                class="px-2.5 py-1.5 rounded-lg text-xs transition min-h-[36px]">
+                                全部 (18)
+                            </button>
+                            <button 
+                                @click="tableTermFilter = '上學期'" 
+                                :class="tableTermFilter === '上學期' ? 'bg-white text-slate-900 font-bold shadow-2xs' : 'text-slate-600'"
+                                class="px-2.5 py-1.5 rounded-lg text-xs transition min-h-[36px]">
+                                上學期 (8)
+                            </button>
+                            <button 
+                                @click="tableTermFilter = '下學期'" 
+                                :class="tableTermFilter === '下學期' ? 'bg-white text-slate-900 font-bold shadow-2xs' : 'text-slate-600'"
+                                class="px-2.5 py-1.5 rounded-lg text-xs transition min-h-[36px]">
+                                下學期 (10)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Desktop View Table with Topics (≥768px) -->
+                    <div class="hidden md:block overflow-x-auto touch-scroll">
+                        <table class="w-full text-left text-xs sm:text-sm">
+                            <thead class="bg-slate-50 text-slate-600 text-[11px] uppercase font-bold border-y border-slate-200 select-none sticky top-0">
+                                <tr>
+                                    <th class="py-3.5 px-4 w-20">學期</th>
+                                    <th class="py-3.5 px-4 w-28">團契日期</th>
+                                    <th class="py-3.5 px-4">週會主題 (Topic)</th>
+                                    <th class="py-3.5 px-4 w-28">團契主席</th>
+                                    <th class="py-3.5 px-4 w-32">敬拜主領</th>
+                                    <th class="py-3.5 px-4 w-28">PPT 負責人</th>
+                                    <th class="py-3.5 px-4 text-center w-24">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr 
+                                    v-for="item in filteredScheduleTable" 
+                                    :key="item.id" 
+                                    :class="item.id === activeScheduleItem.id ? 'bg-teal-50/70 font-semibold' : 'hover:bg-slate-50'"
+                                    class="transition">
+                                    <td class="py-3.5 px-4">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                              :class="item.term === '上學期' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'">
+                                            {{ item.term }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-4 font-bold text-slate-900">
+                                        {{ item.dateDisplay }}
+                                    </td>
+                                    <td class="py-3.5 px-4 font-bold text-teal-800">
+                                        {{ item.theme }}
+                                    </td>
+                                    <td class="py-3.5 px-4 font-medium text-slate-800">
+                                        {{ item.chairperson }}
+                                    </td>
+                                    <td class="py-3.5 px-4 font-bold text-slate-900">
+                                        🎤 {{ item.leader }}
+                                    </td>
+                                    <td class="py-3.5 px-4 font-medium text-slate-800">
+                                        💻 {{ item.ppt }}
+                                    </td>
+                                    <td class="py-3.5 px-4 text-center space-x-1">
+                                        <button 
+                                            @click="selectScheduleById(item.id)" 
+                                            class="text-[11px] px-2.5 py-1.5 rounded-lg border font-semibold transition min-h-[36px]"
+                                            :class="item.id === activeScheduleItem.id ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100'">
+                                            {{ item.id === activeScheduleItem.id ? '已選用' : '選取' }}
+                                        </button>
+                                        <button 
+                                            @click="requestEditSchedule(item)" 
+                                            class="text-xs text-slate-400 hover:text-slate-800 transition p-1"
+                                            title="編輯">
+                                            <i :class="isAdminMode ? 'fa-solid fa-pen' : 'fa-solid fa-lock text-amber-500'"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mobile Card Tiles View (<768px) -->
+                    <div class="block md:hidden p-3 space-y-3">
+                        <div 
+                            v-for="item in filteredScheduleTable" 
+                            :key="item.id"
+                            :class="item.id === activeScheduleItem.id ? 'border-teal-500 ring-2 ring-teal-500/20 bg-teal-50/30' : 'border-slate-200 bg-white'"
+                            class="rounded-xl border p-3.5 space-y-2.5 transition">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                          :class="item.term === '上學期' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-purple-50 text-purple-700 border border-purple-200'">
+                                        {{ item.term }}
+                                    </span>
+                                    <span class="font-black text-slate-900 text-base">{{ item.dateDisplay }}</span>
+                                </div>
+                                <span v-if="item.id === activeScheduleItem.id" class="text-[10px] font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded-full">
+                                    目前選用
+                                </span>
+                            </div>
+
+                            <!-- Mobile Topic Highlight -->
+                            <div class="bg-teal-50/80 p-2.5 rounded-lg border border-teal-100 text-xs">
+                                <span class="font-bold text-teal-900">週會主題：</span>
+                                <span class="font-bold text-teal-700">{{ item.theme }}</span>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div class="bg-indigo-50/60 p-2 rounded-lg border border-indigo-100">
+                                    <div class="text-[10px] text-indigo-700 font-bold mb-0.5">主席</div>
+                                    <div class="font-bold text-slate-800 truncate">{{ item.chairperson }}</div>
+                                </div>
+                                <div class="bg-teal-50/60 p-2 rounded-lg border border-teal-100">
+                                    <div class="text-[10px] text-teal-700 font-bold mb-0.5">主領</div>
+                                    <div class="font-bold text-teal-900 truncate">{{ item.leader }}</div>
+                                </div>
+                                <div class="bg-rose-50/60 p-2 rounded-lg border border-rose-100">
+                                    <div class="text-[10px] text-rose-700 font-bold mb-0.5">PPT</div>
+                                    <div class="font-bold text-slate-800 truncate">{{ item.ppt }}</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-1">
+                                <button 
+                                    @click="requestEditSchedule(item)" 
+                                    class="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg font-medium flex items-center gap-1 min-h-[36px]">
+                                    <i :class="isAdminMode ? 'fa-solid fa-pen' : 'fa-solid fa-lock text-amber-500'"></i>
+                                    <span>修訂</span>
+                                </button>
+                                <button 
+                                    @click="selectScheduleById(item.id)" 
+                                    :class="item.id === activeScheduleItem.id ? 'bg-teal-600 text-white font-bold' : 'bg-slate-900 text-white font-medium'"
+                                    class="text-xs px-3.5 py-1.5 rounded-lg min-h-[36px]">
+                                    {{ item.id === activeScheduleItem.id ? '已選取' : '定位此日' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- TAB 2: 提交敬拜詩歌 (SUBMIT 3 SONGS AT ONCE) -->
+            <section v-if="activeTab === 'submit'" class="max-w-4xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl p-4 sm:p-8 shadow-sm border border-slate-200/80 space-y-6">
+                    <div class="border-b border-slate-100 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-1.5 bg-teal-50 text-teal-700 font-semibold px-2.5 py-0.5 rounded-md text-xs mb-1.5">
+                                <i class="fa-solid fa-music"></i>
+                                <span>3 Songs Worship Form</span>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">一次性提交 3 首敬拜詩歌</h2>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">請為選定團契日期填寫 3 首詩歌的名稱、YouTube 連結及歌詞。</p>
+                        </div>
+                    </div>
+
+                    <form @submit.prevent="submitSongSet" class="space-y-6 sm:space-y-8">
+                        <!-- Top Metadata Inputs -->
+                        <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">對應團契日期與主題 *</label>
+                                <select 
+                                    v-model="newSet.scheduleId" 
+                                    @change="onFormScheduleChange"
+                                    required 
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm bg-white font-medium min-h-[44px]">
+                                    <option v-for="item in scheduleList" :key="item.id" :value="item.id">
+                                        {{ item.dateDisplay }} — {{ item.theme }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1">敬拜主領 / 提交同學 *</label>
+                                <input 
+                                    type="text" 
+                                    v-model="newSet.leader" 
+                                    placeholder="例如：王揚樂" 
+                                    required 
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm bg-white font-medium min-h-[44px]">
+                            </div>
+                        </div>
+
+                        <!-- 3 Songs Tab Switcher inside Form -->
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-3 border-b border-slate-200 gap-1">
+                                <button 
+                                    type="button"
+                                    v-for="(song, idx) in newSet.songs" 
+                                    :key="idx"
+                                    @click="currentFormSongIndex = idx"
+                                    :class="currentFormSongIndex === idx ? 'border-teal-600 text-teal-700 font-bold bg-teal-50/60' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                                    class="py-2.5 sm:py-3 px-2 text-xs sm:text-sm border-b-2 rounded-t-lg transition flex items-center justify-center gap-1.5 min-h-[44px]">
+                                    <span class="w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs flex items-center justify-center font-bold" :class="currentFormSongIndex === idx ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-600'">{{ idx + 1 }}</span>
+                                    <span>詩歌 {{ ['一', '二', '三'][idx] }}</span>
+                                </button>
+                            </div>
+
+                            <!-- Inputs per Song -->
+                            <div 
+                                v-for="(song, idx) in newSet.songs" 
+                                :key="idx" 
+                                v-show="currentFormSongIndex === idx"
+                                class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 space-y-4 shadow-2xs">
+                                
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                                    <span class="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200/60">
+                                        詩歌 {{ ['一', '二', '三'][idx] }} 詳情
+                                    </span>
+                                    <span class="text-xs text-slate-400">第 {{ idx + 1 }} 首詩歌</span>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">詩歌名稱 *</label>
+                                        <input 
+                                            type="text" 
+                                            v-model="song.title" 
+                                            :placeholder="idx === 0 ? '例如：《祢是王》' : idx === 1 ? '例如：《恩典之路》' : '例如：《寶貴十架》'"
+                                            required 
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm font-medium min-h-[44px]">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">YouTube 參考連結 (選填)</label>
+                                        <input 
+                                            type="url" 
+                                            v-model="song.youtubeUrl" 
+                                            placeholder="https://www.youtube.com/watch?v=..." 
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm min-h-[44px]">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">完整歌詞 *</label>
+                                        <textarea 
+                                            v-model="song.lyrics" 
+                                            rows="6" 
+                                            required 
+                                            placeholder="請輸入或貼上完整歌詞..." 
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm font-mono-code leading-relaxed"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Action Button -->
+                        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="text-[11px] sm:text-xs text-slate-500">
+                                💡 提交後詩歌將自動同步記錄於「選歌總表」與「Google Sheet 統計表」。
+                            </div>
+                            <button 
+                                type="submit" 
+                                class="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white font-semibold px-8 py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2 text-sm min-h-[44px]">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>提交 3 首敬拜詩歌</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 3: 歷往選歌總表 (PAST SONG SETS ARCHIVE) -->
+            <section v-if="activeTab === 'archive'" class="space-y-4 sm:space-y-6">
+                <!-- Search & Filter Controls -->
+                <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="relative w-full sm:w-80">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            v-model="archiveSearchQuery" 
+                            placeholder="搜尋團契日期、主領、詩歌名稱..." 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-800 text-sm min-h-[44px]">
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                        <!-- Sort Order Dropdown -->
+                        <select v-model="archiveSortOrder" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold bg-slate-50 min-h-[40px] text-slate-700">
+                            <option value="newest">由新至舊 (最新優先)</option>
+                            <option value="oldest">由舊至新 (最早優先)</option>
+                        </select>
+
+                        <select v-model="archiveYearFilter" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold bg-slate-50 min-h-[40px] text-slate-700">
+                            <option value="ALL">全部年度紀錄</option>
+                            <option value="2526">25-26 學年紀錄 (含夏令營)</option>
+                            <option value="2627">26-27 本學年紀錄</option>
+                        </select>
+                        <span class="text-xs text-slate-500 whitespace-nowrap">
+                            共 <strong class="text-slate-900 font-bold">{{ filteredSongSets.length }}</strong> 次選歌
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Empty Archive State -->
+                <div v-if="filteredSongSets.length === 0" class="bg-white rounded-2xl p-8 sm:p-12 text-center border border-slate-200/80 shadow-sm">
+                    <i class="fa-solid fa-folder-open text-3xl sm:text-4xl text-slate-300 mb-2 block"></i>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-700">未有符合條件的選歌紀錄</h3>
+                </div>
+
+                <!-- Song Sets List Cards -->
+                <div v-else class="space-y-4 sm:space-y-6">
+                    <div 
+                        v-for="set in filteredSongSets" 
+                        :key="set.id" 
+                        class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden hover:shadow-md transition">
+                        
+                        <!-- Header Banner -->
+                        <div class="bg-slate-900 text-white p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300 font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-calendar-day"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold px-2 py-0.2 rounded" :class="set.yearTag === '2526' ? 'bg-amber-500/30 text-amber-300' : 'bg-teal-500/30 text-teal-300'">
+                                            {{ set.yearTag === '2526' ? '25-26 歷年紀錄' : '26-27 本學年' }}
+                                        </span>
+                                        <span class="text-[11px] text-slate-400">團契日期</span>
+                                    </div>
+                                    <div class="text-base sm:text-lg font-bold text-white tracking-tight mt-0.5">{{ set.dateDisplay || set.date }}</div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between sm:justify-end gap-3 text-xs border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
+                                <div class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                                    <span class="text-slate-400">敬拜主領：</span>
+                                    <span class="text-teal-300 font-semibold">{{ set.leader }}</span>
+                                </div>
+                                <div v-if="isAdminMode" class="flex items-center gap-1">
+                                    <button 
+                                        @click="openEditSongSetModal(set)" 
+                                        class="text-slate-400 hover:text-amber-300 transition p-1.5"
+                                        title="修改此選歌紀錄">
+                                        <i class="fa-solid fa-pen-to-square text-sm"></i>
+                                    </button>
+                                    <button 
+                                        @click="promptDeleteSongSet(set.id)" 
+                                        class="text-slate-400 hover:text-red-400 transition p-1.5"
+                                        title="刪除紀錄">
+                                        <i class="fa-solid fa-trash-can text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3 Songs Summary Grid -->
+                        <div class="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-slate-100">
+                            <div 
+                                v-for="(s, idx) in set.songs" 
+                                :key="idx" 
+                                class="bg-slate-50 rounded-xl p-3.5 sm:p-4 border border-slate-200/70 space-y-2.5 flex flex-col justify-between">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] font-semibold text-teal-700 bg-teal-100/60 px-2 py-0.5 rounded">
+                                            詩歌 {{ ['一', '二', '三'][idx] }}
+                                        </span>
+                                    </div>
+                                    <h4 class="font-bold text-slate-900 text-sm sm:text-base">{{ s.title }}</h4>
+                                    <p class="text-xs text-slate-500 font-mono-code line-clamp-3 leading-relaxed whitespace-pre-line">{{ s.lyrics || '暫未提供歌詞' }}</p>
+                                </div>
+
+                                <div class="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                                    <a 
+                                        v-if="s.youtubeUrl" 
+                                        :href="s.youtubeUrl" 
+                                        target="_blank" 
+                                        class="text-red-600 hover:text-red-700 font-medium flex items-center gap-1 py-1">
+                                        <i class="fa-brands fa-youtube"></i>
+                                        <span>觀看影片</span>
+                                    </a>
+                                    <span v-else class="text-slate-400 py-1">無影片連結</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="px-4 py-2.5 bg-slate-50/60 flex justify-end">
+                            <button 
+                                @click="openSetDetailModal(set)" 
+                                class="text-xs font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-2xs min-h-[36px]">
+                                <i class="fa-solid fa-expand"></i>
+                                <span>展開查看完整歌詞</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: 詩歌選用統計 (GOOGLE SHEET SPREADSHEET MODE - NO DISTRIBUTION COLUMN) -->
+            <section v-if="activeTab === 'sheet'" class="space-y-4">
+                <!-- Google Sheet Outer Frame -->
+                <div class="bg-white rounded-2xl border border-slate-300 shadow-lg overflow-hidden flex flex-col">
+                    
+                    <!-- Sheet Header Toolbar -->
+                    <div class="bg-gsheet-header text-white px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-base flex-shrink-0">
+                                <i class="fa-solid fa-file-excel"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="text-[10px] font-bold bg-white/20 px-1.5 py-0.5 rounded text-white">[五旬節林漢光中學 學生團契]</span>
+                                    <span class="text-[10px] text-emerald-100">全庫即時統計</span>
+                                </div>
+                                <h2 class="text-base sm:text-lg font-bold tracking-tight text-white mt-0.5">敬拜詩歌選用次數統計總表.xlsx</h2>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-xs self-start sm:self-auto">
+                            <span class="bg-gsheet-dark px-2.5 py-1 rounded-md text-emerald-100 border border-emerald-400/30 font-mono text-xs">
+                                總收錄不重複詩歌：<strong class="text-white font-bold text-sm ml-1">{{ songStatistics.length }}</strong> 首
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Sheet Control Filter Bar -->
+                    <div class="bg-gsheet-bar px-4 sm:px-6 py-2.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                            <!-- Search -->
+                            <div class="relative w-full sm:w-72">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    v-model="sheetSearchQuery" 
+                                    placeholder="搜尋詩歌名稱..." 
+                                    class="w-full pl-8 pr-3 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white min-h-[36px]">
+                            </div>
+
+                            <!-- Sort Selector -->
+                            <div class="flex items-center gap-1.5 text-xs text-slate-600 justify-between sm:justify-start">
+                                <span class="whitespace-nowrap">排序方式：</span>
+                                <select 
+                                    v-model="sheetSortBy" 
+                                    class="w-full sm:w-auto px-2.5 py-1.5 rounded border border-slate-300 bg-white text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 min-h-[36px]">
+                                    <option value="count">選用次數 (高至低)</option>
+                                    <option value="date">最近使用 (最新至舊)</option>
+                                    <option value="title">詩歌名稱 (筆劃/字母)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="text-[11px] text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-info text-emerald-600"></i>
+                            <span>包含 25/26 及 26/27 歷史選歌總覽</span>
+                        </div>
+                    </div>
+
+                    <!-- Grid Table -->
+                    <div class="overflow-x-auto touch-scroll">
+                        <table class="w-full text-left sheet-table border-collapse text-xs sm:text-sm min-w-[620px]">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 select-none text-xs">
+                                    <th class="py-2 px-3 text-center w-10 bg-slate-200/70 text-slate-500 font-mono">#</th>
+                                    <th class="py-2 px-3">詩歌名稱 (Song Title)</th>
+                                    <th class="py-2 px-3 text-center w-28">累積選用次數</th>
+                                    <th class="py-2 px-3 text-center w-32">最近使用日期</th>
+                                    <th class="py-2 px-3 text-center w-28">YouTube 參考</th>
+                                    <th class="py-2 px-3 text-center w-20">歌詞</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white font-normal">
+                                <tr v-if="songStatistics.length === 0">
+                                    <td colspan="6" class="text-center py-10 text-slate-400">
+                                        <i class="fa-solid fa-table text-2xl mb-1 block"></i>
+                                        暫未有符合條件的詩歌統計數據
+                                    </td>
+                                </tr>
+
+                                <tr v-for="(item, index) in songStatistics" :key="item.title" class="transition-colors">
+                                    <!-- Row Number -->
+                                    <td class="py-2.5 px-3 text-center text-slate-400 font-mono bg-slate-50/60 font-semibold text-xs">
+                                        {{ index + 1 }}
+                                    </td>
+
+                                    <!-- Song Title -->
+                                    <td class="py-2.5 px-3 font-bold text-slate-900">
+                                        <div class="flex items-center gap-1.5">
+                                            <span>{{ item.title }}</span>
+                                            <span v-if="item.count >= 2" class="bg-amber-100 text-amber-800 text-[9px] font-semibold px-1.5 py-0.5 rounded-full border border-amber-300">
+                                                🔥 熱門 ({{ item.count }}次)
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Count -->
+                                    <td class="py-2.5 px-3 text-center">
+                                        <span class="inline-flex items-center justify-center min-w-[2.2rem] px-2.5 py-0.5 rounded-full text-xs font-bold"
+                                              :class="item.count > 1 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-700'">
+                                            {{ item.count }} 次
+                                        </span>
+                                    </td>
+
+                                    <!-- Last Used Date -->
+                                    <td class="py-2.5 px-3 text-center text-slate-600 font-mono text-xs">
+                                        {{ item.lastDate }}
+                                    </td>
+
+                                    <!-- YouTube Link -->
+                                    <td class="py-2.5 px-3 text-center">
+                                        <a 
+                                            v-if="item.youtubeUrl" 
+                                            :href="item.youtubeUrl" 
+                                            target="_blank" 
+                                            class="text-red-600 hover:text-red-700 font-medium inline-flex items-center gap-1 text-[11px] bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                                            <i class="fa-brands fa-youtube"></i>
+                                            <span>觀看</span>
+                                        </a>
+                                        <span v-else class="text-slate-300 text-[11px]">無連結</span>
+                                    </td>
+
+                                    <!-- Lyric Modal Action -->
+                                    <td class="py-2.5 px-3 text-center">
+                                        <button 
+                                            @click="openSingleLyricModal(item)" 
+                                            class="text-teal-700 hover:text-teal-900 font-medium text-xs underline p-1">
+                                            歌詞
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Info -->
+                    <div class="bg-slate-100 border-t border-slate-200 px-4 sm:px-6 py-2 text-[11px] text-slate-500 flex items-center justify-between">
+                        <div>已載入：Sheet1 (五旬節林漢光中學學生團契 25/26 & 26/27 歷史全庫)</div>
+                        <div class="font-mono">Total Unique: {{ songStatistics.length }}</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer Verse Bar (UNIFORM ELEGANT SERIF STYLE & SMALLER SIZE) -->
+        <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-center mt-auto">
+            <div class="max-w-7xl mx-auto px-4 space-y-1">
+                <p class="font-medium text-slate-300 text-xs sm:text-sm">五旬節林漢光中學 學生團契 (PLHKS SCF Worship Team)</p>
+                <p class="font-serif italic tracking-wide text-[11px] sm:text-xs text-slate-400">Taste and see that the Lord is good. Oh, the joys of those who take refuge in him! Psalm 34:8</p>
+            </div>
+        </footer>
+
+        <!-- MODAL 1: Admin Password Dialog (Strictly NO password hints) -->
+        <div v-if="showPasswordModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-amber-500"></i>
+                        <span>管理員身份驗證</span>
+                    </h3>
+                    <button @click="showPasswordModal = false" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-xs text-slate-600">修訂名單、主題、練歌時間與事奉須知需管理員解鎖：</p>
+                    <input 
+                        type="password" 
+                        v-model="adminPasswordInput" 
+                        @keyup.enter="verifyAdminPassword"
+                        placeholder="請輸入密碼..." 
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="showPasswordModal = false" class="px-3.5 py-2 rounded-lg text-slate-600 text-xs font-medium min-h-[36px]">取消</button>
+                    <button @click="verifyAdminPassword" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-xs min-h-[36px]">
+                        確認解鎖
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 2: Edit Duty Schedule & Topic Dialog -->
+        <div v-if="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-teal-600"></i>
+                        <span>修改 {{ editForm.dateDisplay }} 崗位與主題</span>
+                    </h3>
+                    <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">團契週會主題 (Topic)</label>
+                        <input type="text" v-model="editForm.theme" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-bold text-teal-900">
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl space-y-3 border border-slate-200/60">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">🎤 敬拜主領 (Worship Leader)</label>
+                            <input type="text" v-model="editForm.leader" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">👔 團契主席 (Chairperson)</label>
+                            <input type="text" v-model="editForm.chairperson" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">💻 PPT 負責人 (PPT Operator)</label>
+                            <input type="text" v-model="editForm.ppt" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button @click="showEditModal = false" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 text-sm font-medium">取消</button>
+                    <button @click="saveEditSchedule" class="px-5 py-2 rounded-lg bg-teal-600 text-white font-semibold text-sm hover:bg-teal-700 shadow-sm">儲存變更</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 3: View Full Lyrics Modal -->
+        <div v-if="selectedSetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto border border-slate-200">
+                <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <span class="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-0.5 rounded-md mb-1 inline-block">
+                            {{ selectedSetModal.dateDisplay || selectedSetModal.date }}
+                        </span>
+                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">團契敬拜 3 首完整歌單</h2>
+                        <p class="text-slate-500 text-xs mt-1">
+                            <i class="fa-solid fa-user-pen mr-1"></i>敬拜主領：{{ selectedSetModal.leader }}
+                        </p>
+                    </div>
+
+                    <button @click="selectedSetModal = null" class="text-slate-400 hover:text-slate-600 p-1">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <div 
+                        v-for="(song, idx) in selectedSetModal.songs" 
+                        :key="idx" 
+                        class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-teal-600 text-white text-xs px-2.5 py-1 rounded-md font-bold">
+                                    詩歌 {{ ['一', '二', '三'][idx] }}
+                                </span>
+                                <h3 class="text-lg font-bold text-slate-900">{{ song.title }}</h3>
+                            </div>
+                            <a 
+                                v-if="song.youtubeUrl" 
+                                :href="song.youtubeUrl" 
+                                target="_blank" 
+                                class="text-xs text-red-600 font-semibold flex items-center gap-1 bg-red-50 px-2.5 py-1 rounded border border-red-200">
+                                <i class="fa-brands fa-youtube"></i> YouTube 連結
+                            </a>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/80 font-mono-code text-xs text-slate-800 leading-relaxed whitespace-pre-line">
+                            {{ song.lyrics || '暫未提供歌詞' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <button 
+                        @click="selectedSetModal = null" 
+                        class="bg-slate-900 hover:bg-slate-800 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition min-h-[44px]">
+                        關閉視窗
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 4: Single Lyric Modal for Sheet Tab -->
+        <div v-if="singleLyricModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-xl font-bold text-slate-900 mt-1">{{ singleLyricModal.title }}</h3>
+                    <button @click="singleLyricModal = null" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div>
+                    <div class="text-xs font-semibold text-slate-500 mb-2">歌詞預覽：</div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono-code text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line max-h-72 overflow-y-auto">
+                        {{ singleLyricModal.sampleLyrics || '暫未提供歌詞' }}
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button @click="singleLyricModal = null" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-semibold min-h-[36px]">
+                        關閉
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 5: Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-slate-200">
+                <div class="flex items-center gap-3 text-red-600">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                    <h3 class="text-lg font-bold text-slate-900">確認刪除紀錄？</h3>
+                </div>
+                <p class="text-xs text-slate-600">刪除後此敬拜選歌紀錄將無法復原，是否確定繼續？</p>
+                <div class="flex items-center justify-end gap-2 pt-2">
+                    <button @click="showDeleteModal = false" class="px-4 py-2 rounded-lg text-slate-600 text-xs font-medium min-h-[36px]">取消</button>
+                    <button @click="confirmDeleteSongSet" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-xs min-h-[36px]">
+                        確認刪除
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 6: Admin Edit Song Set Modal -->
+        <div v-if="showEditSongSetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs">
+            <div class="bg-white rounded-2xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-slate-200">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-amber-500"></i>
+                        <span>管理員修改選歌紀錄</span>
+                    </h3>
+                    <button @click="showEditSongSetModal = false" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">團契日期與名稱 *</label>
+                            <input type="text" v-model="editSongSetForm.dateDisplay" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">敬拜主領 *</label>
+                            <input type="text" v-model="editSongSetForm.leader" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium">
+                        </div>
+                    </div>
+
+                    <!-- 3 Songs Editing Cards -->
+                    <div v-for="(song, idx) in editSongSetForm.songs" :key="idx" class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
+                        <div class="text-xs font-bold text-teal-800 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[10px]">{{ idx + 1 }}</span>
+                            <span>詩歌 {{ ['一', '二', '三'][idx] }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">詩歌名稱</label>
+                                <input type="text" v-model="song.title" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">YouTube 連結</label>
+                                <input type="url" v-model="song.youtubeUrl" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">歌詞內容</label>
+                            <textarea v-model="song.lyrics" rows="4" class="w-full p-2.5 rounded-lg border border-slate-300 font-mono-code text-xs text-slate-800 leading-relaxed"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                    <button @click="showEditSongSetModal = false" class="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 text-sm font-medium">取消</button>
+                    <button @click="saveEditSongSet" class="px-5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold text-sm shadow-sm">儲存修改</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Vue 3 Application Logic -->
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const activeTab = ref('roster'); 
+
+                // Toast Notification Helper
+                const toast = ref({ show: false, message: '', icon: '' });
+                const triggerToast = (msg, icon = 'fa-solid fa-circle-check') => {
+                    toast.value.message = msg;
+                    toast.value.icon = icon;
+                    toast.value.show = true;
+                    setTimeout(() => { toast.value.show = false; }, 3000);
+                };
+
+                // Admin State
+                const isAdminMode = ref(false);
+                const showPasswordModal = ref(false);
+                const adminPasswordInput = ref('');
+                const pendingEditItem = ref(null);
+
+                const toggleAdminLock = () => {
+                    if (isAdminMode.value) {
+                        isAdminMode.value = false;
+                        triggerToast('已切換回一般瀏覽模式', 'fa-solid fa-lock');
+                    } else {
+                        showPasswordModal.value = true;
+                    }
+                };
+
+                const verifyAdminPassword = () => {
+                    if (adminPasswordInput.value.trim() === 'plhks') {
+                        isAdminMode.value = true;
+                        showPasswordModal.value = false;
+                        adminPasswordInput.value = '';
+                        triggerToast('管理員已成功解鎖！', 'fa-solid fa-lock-open');
+                        if (pendingEditItem.value) {
+                            openEditModal(pendingEditItem.value);
+                            pendingEditItem.value = null;
+                        }
+                    } else {
+                        triggerToast('密碼不正確！請重新輸入', 'fa-solid fa-circle-xmark');
+                    }
+                };
+
+                const requestEditSchedule = (item) => {
+                    if (isAdminMode.value) {
+                        openEditModal(item);
+                    } else {
+                        pendingEditItem.value = item;
+                        showPasswordModal.value = true;
+                    }
+                };
+
+                // Guidelines State
+                const defaultCustomNotice = `【敬拜隊事奉須知】
+1. 每星期團契之前會進行練歌，請於 Group 約定練歌時間。
+2. 如果你需要出席練習但又未能出席的話，記得親自聯絡 Viggo 老師。
+
+【PPT 隊事奉須知】
+1. PPT 人員可自行選擇出席練習。
+2. 簡單流程：敬拜 Group send 歌 → Canva 預備歌詞 PPT → 敬拜隊練歌後 send flow → 修改 Canva PPT flow → 星期五團契時間敬拜負責 PPT。
+3. 對 PPT 崗位有任何疑問，可以聯絡老師 / 潘思叡 / Viggo 老師。`;
+
+                const customNotice = ref(defaultCustomNotice);
+                const isEditingNotice = ref(false);
+
+                const loadCustomNotice = () => {
+                    const saved = localStorage.getItem('PLHK_WORSHIP_NOTICE_STRICT_V10');
+                    if (saved) customNotice.value = saved;
+                };
+
+                const saveNotice = () => {
+                    localStorage.setItem('PLHK_WORSHIP_NOTICE_STRICT_V10', customNotice.value);
+                    isEditingNotice.value = false;
+                    triggerToast('事奉須知已順利儲存！');
+                };
+
+                // ----------------------------------------------------
+                // 1. OFFICIAL 26/27 ROSTER DATASET STRICTLY MATCHING PDF
+                // ----------------------------------------------------
+                const defaultPdfSchedule = [
+                    // Upper Term (上學期)
+                    { id: 'sch-u1', term: '上學期', dateIso: '2026-10-02', dateDisplay: '2/10 (五)', chairperson: '盧嘉嘉 (LKK)', leader: '楊振浩 (YCH)', ppt: '潘思叡', theme: '來啦!團契 Buddy', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u2', term: '上學期', dateIso: '2026-10-09', dateDisplay: '9/10 (五)', chairperson: '謝清流 (TCL)', leader: '胡俊如 (WCY)', ppt: '周子樂', theme: '放學!一齊玩 Game', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u3', term: '上學期', dateIso: '2026-11-06', dateDisplay: '6/11 (五)', chairperson: '吳家賢 (NKY)', leader: '胡俊如 (WCY)', ppt: '潘晴兒', theme: '被全場避開?耶穌話:「我肯!」', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u4', term: '上學期', dateIso: '2026-11-13', dateDisplay: '13/11 (五)', chairperson: '陳美施 (CMS)', leader: '陳廣明 (CKM)', ppt: '黃綺芯', theme: '手感生活體驗 - 全因有你', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u5', term: '上學期', dateIso: '2026-11-20', dateDisplay: '20/11 (五)', chairperson: '李潔梅 (LKM)', leader: '李潔梅 (LKM)', ppt: '莊芷晴', theme: '福音劇 - 最後的一天', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u6', term: '上學期', dateIso: '2026-12-04', dateDisplay: '4/12 (五)', chairperson: '梁心悅', leader: '王揚樂', ppt: '李心兒', theme: '一粒「碎渣」都夠用!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u7', term: '上學期', dateIso: '2026-12-11', dateDisplay: '11/12 (五)', chairperson: '葉皓悅', leader: '陳天恩', ppt: '潘思叡', theme: '叫我靜少少?我偏要大聲喊叫!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-u8', term: '上學期', dateIso: '2026-12-18', dateDisplay: '18/12 (五)', chairperson: '文梓諾', leader: '王揚樂', ppt: '周子樂', theme: '咩~呀~咩~呀~一齊去啦!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    
+                    // Lower Term (下學期)
+                    { id: 'sch-l1', term: '下學期', dateIso: '2027-01-22', dateDisplay: '22/1 (五)', chairperson: '盧嘉嘉 (LKK)', leader: '顏偉恩 (NWY)', ppt: '李凌宇', theme: '考完試未死得?返來「回血」啦!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l2', term: '下學期', dateIso: '2027-01-29', dateDisplay: '29/1 (五)', chairperson: '謝清流 (TCL)', leader: '楊振浩 (YCH)', ppt: '潘晴兒', theme: '加滿油呀!唔該!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l3', term: '下學期', dateIso: '2027-02-19', dateDisplay: '19/2 (五)', chairperson: '潘思叡', leader: '陳天恩', ppt: '黃綺芯', theme: '團契開年 Game', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l4', term: '下學期', dateIso: '2027-02-26', dateDisplay: '26/2 (五)', chairperson: '陳天恩', leader: '陳穎琳、陳芯怡', ppt: '莊芷晴', theme: '得兩毫子? 我全 All-In!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l5', term: '下學期', dateIso: '2027-04-09', dateDisplay: '9/4 (五)', chairperson: '林道證', leader: '何雨瞳', ppt: '李心兒', theme: '潛完水?天使叫埋你「重新嚟過!」', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l6', term: '下學期', dateIso: '2027-04-16', dateDisplay: '16/4 (五)', chairperson: '王揚樂', leader: '吳依霖', ppt: '潘晴兒', theme: '最好的禮物', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l7', term: '下學期', dateIso: '2027-04-23', dateDisplay: '23/4 (五)', chairperson: '陳美施 (CMS)', leader: '黃顧純 (WKS)', ppt: '黃綺芯', theme: '幸福不缺席: 主恩夠你用!', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l8', term: '下學期', dateIso: '2027-05-07', dateDisplay: '7/5 (五)', chairperson: '吳依霖', leader: '王揚樂', ppt: '莊芷晴', theme: '詩歌集結號 - 走音都唔怕', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l9', term: '下學期', dateIso: '2027-05-14', dateDisplay: '14/5 (五)', chairperson: '葉皓悅', leader: '梁諾琛 (LNS)', ppt: '李心兒', theme: '我們的主打歌: 恩典之歌', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' },
+                    { id: 'sch-l10', term: '下學期', dateIso: '2027-05-21', dateDisplay: '21/5 (五)', chairperson: 'SCF', leader: 'SCF', ppt: '潘思叡', theme: 'King of Kings 終極聖經比賽', practiceTime: '團契當日 12:40 - 13:20 (音樂室)' }
+                ];
+
+                const scheduleList = ref([...defaultPdfSchedule]);
+                const selectedScheduleId = ref('sch-u1');
+                const tableTermFilter = ref('ALL');
+
+                const loadScheduleFromStorage = () => {
+                    const saved = localStorage.getItem('PLHK_WORSHIP_SCHEDULE_STRICT_V10');
+                    if (saved) {
+                        try { scheduleList.value = JSON.parse(saved); } catch (e) { scheduleList.value = [...defaultPdfSchedule]; }
+                    } else {
+                        scheduleList.value = [...defaultPdfSchedule];
+                        saveScheduleToStorage();
+                    }
+                };
+
+                const saveScheduleToStorage = () => {
+                    localStorage.setItem('PLHK_WORSHIP_SCHEDULE_STRICT_V10', JSON.stringify(scheduleList.value));
+                };
+
+                const upperTermSchedule = computed(() => scheduleList.value.filter(s => s.term === '上學期'));
+                const lowerTermSchedule = computed(() => scheduleList.value.filter(s => s.term === '下學期'));
+
+                const filteredScheduleTable = computed(() => {
+                    if (tableTermFilter.value === 'ALL') return scheduleList.value;
+                    return scheduleList.value.filter(s => s.term === tableTermFilter.value);
+                });
+
+                const activeScheduleItem = computed(() => {
+                    const found = scheduleList.value.find(s => s.id === selectedScheduleId.value);
+                    if (found) return found;
+                    if (scheduleList.value && scheduleList.value.length > 0) return scheduleList.value[0];
+                    return {
+                        id: 'fallback',
+                        term: '上學期',
+                        dateIso: '2026-10-02',
+                        dateDisplay: '2/10 (五)',
+                        chairperson: '盧嘉嘉 (LKK)',
+                        leader: '楊振浩 (YCH)',
+                        ppt: '潘思叡',
+                        theme: '來啦!團契 Buddy',
+                        practiceTime: '團契當日 12:40 - 13:20 (音樂室)'
+                    };
+                });
+
+                const selectedScheduleIndex = computed(() => {
+                    const idx = scheduleList.value.findIndex(s => s.id === selectedScheduleId.value);
+                    return idx >= 0 ? idx : 0;
+                });
+
+                const selectScheduleById = (id) => {
+                    selectedScheduleId.value = id;
+                    triggerToast(`已成功切換至 ${activeScheduleItem.value.dateDisplay || ''} 團契`);
+                };
+
+                const snapToNextUpcoming = () => {
+                    try {
+                        if (!scheduleList.value || scheduleList.value.length === 0) return;
+                        
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        // 智慧搜尋下一個大於或等於今天的團契日期
+                        const upcoming = scheduleList.value.find(s => s.dateIso && s.dateIso >= todayStr);
+                        
+                        if (upcoming) {
+                            selectedScheduleId.value = upcoming.id;
+                            triggerToast(`已自動定位至最近團契：${upcoming.dateDisplay}`);
+                        } else {
+                            // 若所有日期均已過去，自動定位至最後一場
+                            const lastItem = scheduleList.value[scheduleList.value.length - 1];
+                            selectedScheduleId.value = lastItem.id;
+                            triggerToast(`已定位至最後一場團契：${lastItem.dateDisplay}`);
+                        }
+                    } catch (e) {
+                        console.error('snapToNextUpcoming error:', e);
+                        if (scheduleList.value && scheduleList.value.length > 0) {
+                            selectedScheduleId.value = scheduleList.value[0].id;
+                        }
+                        triggerToast('已定位至團契名單');
+                    }
+                };
+
+                // Modal for Edit
+                const showEditModal = ref(false);
+                const editForm = ref({ id: '', dateDisplay: '', leader: '', chairperson: '', ppt: '', theme: '' });
+
+                const openEditModal = (item) => {
+                    editForm.value = { ...item };
+                    showEditModal.value = true;
+                };
+
+                const saveEditSchedule = () => {
+                    const index = scheduleList.value.findIndex(s => s.id === editForm.value.id);
+                    if (index !== -1) {
+                        scheduleList.value[index] = { ...editForm.value };
+                        saveScheduleToStorage();
+                        showEditModal.value = false;
+                        triggerToast('團契崗位與主題修訂成功！');
+                    }
+                };
+
+                const copyWhatsAppRoster = () => {
+                    const item = activeScheduleItem.value;
+                    const text = `✨ 【五旬節林漢光中學 學生團契】敬拜與事奉通知 ✨
+📅 團契日期：${item.dateDisplay}
+📌 週會主題：${item.theme}
+----------------------------
+🎤 敬拜主領：${item.leader}
+👔 團契主席：${item.chairperson}
+💻 PPT 負責人：${item.ppt}
+----------------------------
+${customNotice.value}`;
+
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        triggerToast('已成功複製 WhatsApp 排版通知！');
+                    } catch (err) {
+                        triggerToast('複製失敗，請手動複製', 'fa-solid fa-circle-xmark');
+                    }
+                    document.body.removeChild(textarea);
+                };
+
+                // 25/26 WhatsApp historical sets + 26/27 sets
+                const default2526SongSets = [
+                    {
+                        id: 'set-2526-1',
+                        yearTag: '2526',
+                        date: '3/10/2025',
+                        dateDisplay: '3/10/2025 (25-26 團契)',
+                        leader: '顏偉恩 (顏sir)',
+                        songs: [
+                            { title: '一首讃美的詩歌', youtubeUrl: 'https://youtu.be/b2ikeCRKTwQ', lyrics: '暫未提供歌詞' },
+                            { title: '儘管我尚未看見', youtubeUrl: 'https://youtu.be/PtJLd5GEyb4', lyrics: '暫未提供歌詞' },
+                            { title: '互相守望', youtubeUrl: 'https://youtu.be/NhtYmJVb8ss', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-2',
+                        yearTag: '2526',
+                        date: '10/10/2025',
+                        dateDisplay: '10/10/2025 (25-26 團契)',
+                        leader: 'Viggo 老師',
+                        songs: [
+                            { title: '跟祢', youtubeUrl: 'https://youtu.be/-3txRzEcfcA', lyrics: '暫未提供歌詞' },
+                            { title: '神是我這生供應者', youtubeUrl: 'https://youtu.be/r6in4nCBcbA', lyrics: '暫未提供歌詞' },
+                            { title: '主祢照亮了一切', youtubeUrl: 'https://youtu.be/LO9TzWjwomE', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-3',
+                        yearTag: '2526',
+                        date: '17/10/2025',
+                        dateDisplay: '17/10/2025 (25-26 團契)',
+                        leader: '王揚樂 (Story)',
+                        songs: [
+                            { title: '與祢更靠近', youtubeUrl: 'https://youtu.be/r9pqYpDbT5I', lyrics: '暫未提供歌詞' },
+                            { title: '甦醒愛', youtubeUrl: 'https://youtu.be/HvCTaHJp0Gk', lyrics: '暫未提供歌詞' },
+                            { title: '我安然居住', youtubeUrl: 'https://youtu.be/kNOuWvdPgiA', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-4',
+                        yearTag: '2526',
+                        date: '7/11/2025',
+                        dateDisplay: '7/11/2025 (25-26 團契)',
+                        leader: '陳天恩 (CTY)',
+                        songs: [
+                            { title: '上帝總不撇下我', youtubeUrl: 'https://youtu.be/jnl3izvrzsk', lyrics: '暫未提供歌詞' },
+                            { title: '保守我心', youtubeUrl: 'https://youtu.be/RHXlDJ7d4IQ', lyrics: '暫未提供歌詞' },
+                            { title: '能不能', youtubeUrl: 'https://youtu.be/rZw6z8hH7Jc', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-5',
+                        yearTag: '2526',
+                        date: '14/11/2025',
+                        dateDisplay: '14/11/2025 (25-26 福音週)',
+                        leader: '李潔梅老師 (Kitty)',
+                        songs: [
+                            { title: '神是我這生供應者', youtubeUrl: 'https://youtu.be/r6in4nCBcbA', lyrics: '暫未提供歌詞' },
+                            { title: '祈求主聖靈', youtubeUrl: '', lyrics: '暫未提供歌詞' },
+                            { title: '立志擺上', youtubeUrl: '', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-6',
+                        yearTag: '2526',
+                        date: '28/11/2025',
+                        dateDisplay: '28/11/2025 (25-26 團契)',
+                        leader: 'Hazel 老師',
+                        songs: [
+                            { title: '神我屬祢', youtubeUrl: 'https://youtu.be/OsVuY9VEF9s', lyrics: '暫未提供歌詞' },
+                            { title: '主祢知道', youtubeUrl: 'https://youtu.be/H0B6KPHYbSQ', lyrics: '暫未提供歌詞' },
+                            { title: '逾越', youtubeUrl: 'https://youtu.be/AkUIi-zYEBE', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-7',
+                        yearTag: '2526',
+                        date: '5/12/2025',
+                        dateDisplay: '5/12/2025 (25-26 團契)',
+                        leader: 'Ms Wu',
+                        songs: [
+                            { title: '投靠', youtubeUrl: 'https://youtu.be/-1SDu-a2ENo', lyrics: '暫未提供歌詞' },
+                            { title: '其實我可不止一個人', youtubeUrl: 'https://youtu.be/Cs_OiV4PwbU', lyrics: '暫未提供歌詞' },
+                            { title: '憑信跨過', youtubeUrl: 'https://youtu.be/Y6CF2cycswU', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-8',
+                        yearTag: '2526',
+                        date: '12/12/2025',
+                        dateDisplay: '12/12/2025 (25-26 團契)',
+                        leader: '顏偉恩 (顏sir)',
+                        songs: [
+                            { title: 'Lord I Lift Your Name On High', youtubeUrl: '', lyrics: '暫未提供歌詞' },
+                            { title: 'You Are Not Alone', youtubeUrl: '', lyrics: '暫未提供歌詞' },
+                            { title: '畢生的獻呈', youtubeUrl: '', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-9',
+                        yearTag: '2526',
+                        date: '30/1/2026',
+                        dateDisplay: '30/1/2026 (25-26 團契)',
+                        leader: '顏偉恩 (顏sir)',
+                        songs: [
+                            { title: '安靜', youtubeUrl: 'https://youtu.be/-YRgF25YBIg', lyrics: '暫未提供歌詞' },
+                            { title: '十架的冠冕', youtubeUrl: 'https://youtu.be/4KutWDvD6A0', lyrics: '暫未提供歌詞' },
+                            { title: '傾聽我的心', youtubeUrl: 'https://youtu.be/PtiQt4n4Afs', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-10',
+                        yearTag: '2526',
+                        date: '6/2/2026',
+                        dateDisplay: '6/2/2026 (25-26 團契)',
+                        leader: 'Ms Wu',
+                        songs: [
+                            { title: '建殿者的呼聲', youtubeUrl: 'https://youtu.be/_KwjfqgDnF4', lyrics: '暫未提供歌詞' },
+                            { title: 'I Have Decided to Follow Jesus', youtubeUrl: 'https://youtu.be/B4aX8uU4PCg', lyrics: '暫未提供歌詞' },
+                            { title: '滿有能力', youtubeUrl: '', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-11',
+                        yearTag: '2526',
+                        date: '27/2/2026',
+                        dateDisplay: '27/2/2026 (25-26 團契)',
+                        leader: '黃顧純老師',
+                        songs: [
+                            { title: '全地至高是我主', youtubeUrl: 'https://youtu.be/-gRLvt8SjMM', lyrics: '暫未提供歌詞' },
+                            { title: '仍能讚美', youtubeUrl: 'https://youtu.be/lxf0GZI1XB0', lyrics: '暫未提供歌詞' },
+                            { title: 'You Are My All in All', youtubeUrl: 'https://youtu.be/lie1L61Qnos', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-12',
+                        yearTag: '2526',
+                        date: '6/3/2026',
+                        dateDisplay: '6/3/2026 (25-26 團契)',
+                        leader: '陳天恩',
+                        songs: [
+                            { title: '主我知道', youtubeUrl: 'https://youtu.be/H0B6KPHYbSQ', lyrics: '暫未提供歌詞' },
+                            { title: '避難所', youtubeUrl: 'https://youtu.be/RSs6f1BAZ_4', lyrics: '暫未提供歌詞' },
+                            { title: '如飛的一生', youtubeUrl: 'https://youtu.be/WmyhixDO0o4', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-13',
+                        yearTag: '2526',
+                        date: '17/4/2026',
+                        dateDisplay: '17/4/2026 (25-26 團契)',
+                        leader: '王揚樂',
+                        songs: [
+                            { title: '陪我走過春夏秋冬', youtubeUrl: 'https://youtu.be/AjL3gfY9SOA', lyrics: '暫未提供歌詞' },
+                            { title: '住在你裏面', youtubeUrl: 'https://youtu.be/SwOo8sFZQA8', lyrics: '暫未提供歌詞' },
+                            { title: '跟隨你心意', youtubeUrl: 'https://youtu.be/SZX688bPGHM', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-14',
+                        yearTag: '2526',
+                        date: '24/4/2026',
+                        dateDisplay: '24/4/2026 (25-26 團契)',
+                        leader: '潘家詠老師',
+                        songs: [
+                            { title: '我要愛慕祢', youtubeUrl: 'https://youtu.be/2IJbuIeyQog', lyrics: '暫未提供歌詞' },
+                            { title: '你成就救恩', youtubeUrl: 'https://youtu.be/DXJPCC_D3nk', lyrics: '暫未提供歌詞' },
+                            { title: '靠著耶穌得勝', youtubeUrl: 'https://youtu.be/wq8ASj79nS0', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-15',
+                        yearTag: '2526',
+                        date: '8/5/2026',
+                        dateDisplay: '8/5/2026 (25-26 團契)',
+                        leader: '張健熙',
+                        songs: [
+                            { title: '約書亞', youtubeUrl: 'https://youtu.be/Ygfe0Fxk3d0', lyrics: '暫未提供歌詞' },
+                            { title: '互相守望', youtubeUrl: 'https://youtu.be/NhtYmJVb8ss', lyrics: '暫未提供歌詞' },
+                            { title: '平安的約', youtubeUrl: 'https://youtu.be/IRkqBJeon6o', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-16',
+                        yearTag: '2526',
+                        date: '15/5/2026',
+                        dateDisplay: '15/5/2026 (25-26 團契)',
+                        leader: 'Hazel 老師',
+                        songs: [
+                            { title: '信', youtubeUrl: 'https://youtu.be/9XzlZpp7lJI', lyrics: '暫未提供歌詞' },
+                            { title: '透著你的榮光', youtubeUrl: 'https://youtu.be/tETki9F-0j0', lyrics: '暫未提供歌詞' },
+                            { title: '一生的恩惠', youtubeUrl: 'https://youtu.be/W5VRtNyn-j8', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-17',
+                        yearTag: '2526',
+                        date: '22/5/2026',
+                        dateDisplay: '22/5/2026 (25-26 團契)',
+                        leader: 'Elim',
+                        songs: [
+                            { title: '互相守望', youtubeUrl: 'https://youtu.be/NhtYmJVb8ss', lyrics: '暫未提供歌詞' },
+                            { title: '在那裏祢手必引導', youtubeUrl: 'https://youtu.be/eZ37VzoK6i4', lyrics: '暫未提供歌詞' },
+                            { title: '信就有希望', youtubeUrl: 'https://youtu.be/IUu_UTpwzW8', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-1',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (開營禮)',
+                        leader: '周均蔚',
+                        songs: [
+                            { title: '信就有希望', youtubeUrl: 'https://youtu.be/IUu_UTpwzW8', lyrics: '暫未提供歌詞' },
+                            { title: '約書亞', youtubeUrl: 'https://youtu.be/xqrpKWbvCMs', lyrics: '暫未提供歌詞' },
+                            { title: '儘管我尚未看見', youtubeUrl: 'https://youtu.be/PtJLd5GEyb4', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-2',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (閉營禮)',
+                        leader: '周均蔚、王揚樂',
+                        songs: [
+                            { title: '唯有主基督', youtubeUrl: 'https://youtu.be/oAaN-FE3GuY', lyrics: '暫未提供歌詞' },
+                            { title: '陪我渡過', youtubeUrl: 'https://youtu.be/Fzs1uHV0qPQ', lyrics: '暫未提供歌詞' },
+                            { title: '滿有能力', youtubeUrl: 'https://youtu.be/uTGPl8f-reQ', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-3',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (清晨敬拜1)',
+                        leader: '陳天恩、吳依霖',
+                        songs: [
+                            { title: '保守我心', youtubeUrl: 'https://youtu.be/RHXlDJ7d4IQ', lyrics: '暫未提供歌詞' },
+                            { title: '相信就是答案', youtubeUrl: 'https://youtu.be/-DBEfnW0894', lyrics: '暫未提供歌詞' },
+                            { title: '無聲頌', youtubeUrl: 'https://youtu.be/xeQi6-dRTm0', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-4',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (清晨敬拜2)',
+                        leader: '王揚樂、何雨曈',
+                        songs: [
+                            { title: '我要向高山舉目', youtubeUrl: 'https://youtu.be/HfE3WNcdDTk', lyrics: '暫未提供歌詞' },
+                            { title: '簡單的歌', youtubeUrl: 'https://youtu.be/DKfG_kniofo', lyrics: '暫未提供歌詞' },
+                            { title: '因主的名', youtubeUrl: 'https://youtu.be/jNYuGpnnbpc', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-5',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (晚會1)',
+                        leader: 'Vincy Lee',
+                        songs: [
+                            { title: '一生的恩惠', youtubeUrl: 'https://youtu.be/W5VRtNyn-j8', lyrics: '暫未提供歌詞' },
+                            { title: '祢是葡萄樹我是枝子', youtubeUrl: 'https://youtu.be/eM0QtWYFIME', lyrics: '暫未提供歌詞' },
+                            { title: '微小的聲音', youtubeUrl: 'https://youtu.be/wIHWPKZKc1Q', lyrics: '暫未提供歌詞' }
+                        ]
+                    },
+                    {
+                        id: 'set-2526-camp-6',
+                        yearTag: '2526',
+                        date: '7/2026',
+                        dateDisplay: 'Summer Camp (晚會2)',
+                        leader: 'YCH',
+                        songs: [
+                            { title: '能不能', youtubeUrl: 'https://youtu.be/rZw6z8hH7Jc', lyrics: '暫未提供歌詞' },
+                            { title: '我的名字在祢心上', youtubeUrl: 'https://youtu.be/uiEYQz1JY2U', lyrics: '暫未提供歌詞' },
+                            { title: '主祢照亮了一切', youtubeUrl: 'https://youtu.be/LO9TzWjwomE', lyrics: '暫未提供歌詞' }
+                        ]
+                    }
+                ];
+
+                const songSets = ref([...default2526SongSets]);
+                const archiveSearchQuery = ref('');
+                const archiveYearFilter = ref('ALL');
+                const archiveSortOrder = ref('newest'); // 'newest' | 'oldest'
+
+                const loadSongSets = () => {
+                    const saved = localStorage.getItem('PLHK_WORSHIP_SONGSETS_STRICT_V10');
+                    if (saved) {
+                        try { songSets.value = JSON.parse(saved); } catch (e) { songSets.value = [...default2526SongSets]; }
+                    } else {
+                        songSets.value = [...default2526SongSets];
+                        saveSongSetsToStorage();
+                    }
+                };
+
+                const saveSongSetsToStorage = () => {
+                    localStorage.setItem('PLHK_WORSHIP_SONGSETS_STRICT_V10', JSON.stringify(songSets.value));
+                };
+
+                const filteredSongSets = computed(() => {
+                    let list = songSets.value.filter(set => {
+                        if (archiveYearFilter.value !== 'ALL' && set.yearTag !== archiveYearFilter.value) {
+                            return false;
+                        }
+                        if (!archiveSearchQuery.value.trim()) return true;
+                        const q = archiveSearchQuery.value.toLowerCase();
+                        const matchHeader = (set.dateDisplay || set.date).toLowerCase().includes(q) || set.leader.toLowerCase().includes(q);
+                        const matchSongs = set.songs.some(s => s.title.toLowerCase().includes(q) || (s.lyrics && s.lyrics.toLowerCase().includes(q)));
+                        return matchHeader || matchSongs;
+                    });
+
+                    // Sorting order logic
+                    return list.slice().sort((a, b) => {
+                        const isANew = a.yearTag === '2627';
+                        const isBNew = b.yearTag === '2627';
+                        const idxA = songSets.value.indexOf(a);
+                        const idxB = songSets.value.indexOf(b);
+
+                        if (archiveSortOrder.value === 'newest') {
+                            if (isANew && !isBNew) return -1;
+                            if (!isANew && isBNew) return 1;
+                            // Within 2526 sets, higher array index means later date (e.g. Camp > Oct 2025)
+                            if (!isANew && !isBNew) return idxB - idxA;
+                            return idxA - idxB;
+                        } else {
+                            if (isANew && !isBNew) return 1;
+                            if (!isANew && isBNew) return -1;
+                            if (!isANew && !isBNew) return idxA - idxB;
+                            return idxB - idxA;
+                        }
+                    });
+                });
+
+                // Modal for Admin Editing Song Set
+                const showEditSongSetModal = ref(false);
+                const editSongSetForm = ref({ id: '', dateDisplay: '', leader: '', songs: [] });
+
+                const openEditSongSetModal = (set) => {
+                    editSongSetForm.value = JSON.parse(JSON.stringify(set));
+                    showEditSongSetModal.value = true;
+                };
+
+                const saveEditSongSet = () => {
+                    const idx = songSets.value.findIndex(s => s.id === editSongSetForm.value.id);
+                    if (idx !== -1) {
+                        songSets.value[idx] = JSON.parse(JSON.stringify(editSongSetForm.value));
+                        saveSongSetsToStorage();
+                        showEditSongSetModal.value = false;
+                        triggerToast('選歌紀錄修改成功！');
+                    }
+                };
+
+                // Submit form state
+                const currentFormSongIndex = ref(0);
+                const newSet = ref({
+                    scheduleId: 'sch-u1',
+                    leader: '楊振浩 (YCH)',
+                    songs: [
+                        { title: '', youtubeUrl: '', lyrics: '' },
+                        { title: '', youtubeUrl: '', lyrics: '' },
+                        { title: '', youtubeUrl: '', lyrics: '' }
+                    ]
+                });
+
+                const onFormScheduleChange = () => {
+                    const selected = scheduleList.value.find(s => s.id === newSet.value.scheduleId);
+                    if (selected) {
+                        newSet.value.leader = selected.leader;
+                    }
+                };
+
+                const goToSubmitWithLeader = (leaderName) => {
+                    newSet.value.leader = leaderName;
+                    activeTab.value = 'submit';
+                };
+
+                const submitSongSet = () => {
+                    const scheduleItem = scheduleList.value.find(s => s.id === newSet.value.scheduleId);
+                    const dateStr = scheduleItem ? scheduleItem.dateDisplay : '26/27 團契';
+
+                    const createdSet = {
+                        id: 'set-2627-' + Date.now(),
+                        yearTag: '2627',
+                        date: dateStr,
+                        dateDisplay: `${dateStr} (${scheduleItem ? scheduleItem.theme : '26-27 本學年'})`,
+                        leader: newSet.value.leader,
+                        songs: JSON.parse(JSON.stringify(newSet.value.songs))
+                    };
+
+                    songSets.value.unshift(createdSet);
+                    saveSongSetsToStorage();
+
+                    newSet.value.songs = [
+                        { title: '', youtubeUrl: '', lyrics: '' },
+                        { title: '', youtubeUrl: '', lyrics: '' },
+                        { title: '', youtubeUrl: '', lyrics: '' }
+                    ];
+
+                    triggerToast('成功提交 3 首敬拜詩歌！已同步至總表與統計');
+                    activeTab.value = 'archive';
+                };
+
+                // Modal for Song Set Detail
+                const selectedSetModal = ref(null);
+                const openSetDetailModal = (set) => {
+                    selectedSetModal.value = set;
+                };
+
+                // Modal for Single Lyric
+                const singleLyricModal = ref(null);
+                const openSingleLyricModal = (item) => {
+                    singleLyricModal.value = item;
+                };
+
+                // Modal for Delete
+                const showDeleteModal = ref(false);
+                const deletingSetId = ref(null);
+
+                const promptDeleteSongSet = (id) => {
+                    deletingSetId.value = id;
+                    showDeleteModal.value = true;
+                };
+
+                const confirmDeleteSongSet = () => {
+                    if (deletingSetId.value) {
+                        songSets.value = songSets.value.filter(s => s.id !== deletingSetId.value);
+                        saveSongSetsToStorage();
+                        showDeleteModal.value = false;
+                        deletingSetId.value = null;
+                        triggerToast('已成功刪除選歌紀錄');
+                    }
+                };
+
+                // Google Sheet Statistics Computation (NO DISTRIBUTION COLUMN)
+                const sheetSearchQuery = ref('');
+                const sheetSortBy = ref('count');
+
+                const songStatistics = computed(() => {
+                    const map = {};
+
+                    songSets.value.forEach(set => {
+                        const setDateStr = set.dateDisplay || set.date;
+                        set.songs.forEach((s) => {
+                            const cleanTitle = s.title.trim();
+                            if (!cleanTitle) return;
+
+                            if (!map[cleanTitle]) {
+                                map[cleanTitle] = {
+                                    title: cleanTitle,
+                                    count: 0,
+                                    lastDate: setDateStr,
+                                    youtubeUrl: s.youtubeUrl || '',
+                                    sampleLyrics: s.lyrics || '暫未提供歌詞'
+                                };
+                            }
+
+                            map[cleanTitle].count += 1;
+                            if (!map[cleanTitle].youtubeUrl && s.youtubeUrl) {
+                                map[cleanTitle].youtubeUrl = s.youtubeUrl;
+                            }
+                            if ((map[cleanTitle].sampleLyrics === '暫未提供歌詞' || !map[cleanTitle].sampleLyrics) && s.lyrics) {
+                                map[cleanTitle].sampleLyrics = s.lyrics;
+                            }
+                        });
+                    });
+
+                    let list = Object.values(map);
+
+                    if (sheetSearchQuery.value.trim()) {
+                        const q = sheetSearchQuery.value.toLowerCase();
+                        list = list.filter(item => item.title.toLowerCase().includes(q));
+                    }
+
+                    if (sheetSortBy.value === 'count') {
+                        list.sort((a, b) => b.count - a.count);
+                    } else if (sheetSortBy.value === 'date') {
+                        list.sort((a, b) => b.lastDate.localeCompare(a.lastDate));
+                    } else if (sheetSortBy.value === 'title') {
+                        list.sort((a, b) => a.title.localeCompare(b.title, 'zh-HK'));
+                    }
+
+                    return list;
+                });
+
+                const totalUniqueSongsCount = computed(() => {
+                    return songStatistics.value.length;
+                });
+
+                onMounted(() => {
+                    loadCustomNotice();
+                    loadScheduleFromStorage();
+                    loadSongSets();
+                });
+
+                return {
+                    activeTab,
+                    toast,
+                    isAdminMode,
+                    showPasswordModal,
+                    adminPasswordInput,
+                    toggleAdminLock,
+                    verifyAdminPassword,
+                    requestEditSchedule,
+                    customNotice,
+                    isEditingNotice,
+                    saveNotice,
+                    scheduleList,
+                    selectedScheduleId,
+                    tableTermFilter,
+                    upperTermSchedule,
+                    lowerTermSchedule,
+                    filteredScheduleTable,
+                    activeScheduleItem,
+                    selectedScheduleIndex,
+                    selectScheduleById,
+                    snapToNextUpcoming,
+                    showEditModal,
+                    editForm,
+                    saveEditSchedule,
+                    copyWhatsAppRoster,
+                    songSets,
+                    archiveSearchQuery,
+                    archiveYearFilter,
+                    archiveSortOrder,
+                    filteredSongSets,
+                    showEditSongSetModal,
+                    editSongSetForm,
+                    openEditSongSetModal,
+                    saveEditSongSet,
+                    currentFormSongIndex,
+                    newSet,
+                    onFormScheduleChange,
+                    goToSubmitWithLeader,
+                    submitSongSet,
+                    selectedSetModal,
+                    openSetDetailModal,
+                    singleLyricModal,
+                    openSingleLyricModal,
+                    showDeleteModal,
+                    promptDeleteSongSet,
+                    confirmDeleteSongSet,
+                    sheetSearchQuery,
+                    sheetSortBy,
+                    songStatistics,
+                    totalUniqueSongsCount
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
